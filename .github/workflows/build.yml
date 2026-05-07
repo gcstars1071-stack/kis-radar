@@ -1,0 +1,43 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # 수동 실행 버튼
+
+jobs:
+  build:
+    runs-on: windows-latest   # Windows 환경에서 빌드
+
+    steps:
+    - name: 코드 체크아웃
+      uses: actions/checkout@v4
+
+    - name: Python 설치
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: 패키지 설치
+      run: |
+        pip install flask flask-cors requests pyinstaller
+
+    - name: EXE 빌드
+      run: |
+        pyinstaller --onefile `
+          --name "KIS_SmartMoney_Radar" `
+          --hidden-import flask `
+          --hidden-import flask_cors `
+          --hidden-import requests `
+          --hidden-import werkzeug `
+          --hidden-import jinja2 `
+          --hidden-import itsdangerous `
+          --hidden-import click `
+          KIS_SmartMoney_Radar.py
+
+    - name: EXE 업로드 (다운로드 가능하게)
+      uses: actions/upload-artifact@v4
+      with:
+        name: KIS_SmartMoney_Radar_Windows
+        path: dist/KIS_SmartMoney_Radar.exe
+        retention-days: 30   # 30일간 보관
